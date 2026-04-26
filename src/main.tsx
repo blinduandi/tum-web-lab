@@ -8,11 +8,14 @@ const container = document.getElementById("root");
 if (!container) throw new Error("#root element missing from index.html");
 
 import { ThemeProvider } from "./theme/ThemeProvider";
+import { LibraryProvider } from "./data/LibraryContext";
 
 createRoot(container).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <LibraryProvider>
+        <App />
+      </LibraryProvider>
     </ThemeProvider>
   </StrictMode>,
 );
