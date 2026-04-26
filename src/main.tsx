@@ -7,8 +7,12 @@ import "./styles/global.css";
 const container = document.getElementById("root");
 if (!container) throw new Error("#root element missing from index.html");
 
+import { ThemeProvider } from "./theme/ThemeProvider";
+
 createRoot(container).render(
   <StrictMode>
-    <App />
+    <ThemeProvider>
+      <App />
+    </ThemeProvider>
   </StrictMode>,
 );
