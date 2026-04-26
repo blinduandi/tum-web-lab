@@ -50,15 +50,24 @@ export function htmlToText(html) {
   s = s.replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, "");
   s = s.replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, "");
 
+  // Surface link targets inline, so URLs aren't lost when tags are stripped.
+  // <a href="X">text</a> -> "text (X)"
+  s = s.replace(
+    /<a\b[^>]*\bhref="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi,
+    (_, href, inner) => `${inner} (${href})`,
+  );
+
   // Convert <br> and block-level tags into newlines so paragraphs survive.
   s = s.replace(/<\s*br\s*\/?\s*>/gi, "\n");
   s = s.replace(
-    /<\/?\s*(p|div|section|article|header|footer|nav|main|aside|li|tr|h[1-6]|pre|blockquote|hr|table)\b[^>]*>/gi,
+    /<\/?\s*(p|div|section|article|header|footer|nav|main|aside|tr|h[1-6]|pre|blockquote|hr|table)\b[^>]*>/gi,
     "\n",
   );
 
-  // Markers for list items so the user can see the structure.
+  // List items get a bullet on their own line. Closing </li> is dropped
+  // (don't emit a paragraph break between consecutive list items).
   s = s.replace(/<\s*li\b[^>]*>/gi, "\n  • ");
+  s = s.replace(/<\/\s*li\s*>/gi, "");
 
   // Drop everything that's still a tag.
   s = s.replace(/<[^>]+>/g, "");
