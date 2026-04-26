@@ -5,6 +5,7 @@ import { BookGrid } from "./components/BookGrid";
 import { BookForm } from "./components/BookForm";
 import { FilterBar } from "./components/FilterBar";
 import { Modal } from "./components/Modal";
+import { StatsPanel } from "./components/StatsPanel";
 import { useLibrary } from "./data/LibraryContext";
 import { applyFilters, DEFAULT_FILTERS } from "./data/filter";
 import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
@@ -85,12 +86,15 @@ export default function App() {
       ) : (
         <>
           {hasAnyBooks ? (
-            <FilterBar
-              filters={filters}
-              onChange={setFilters}
-              totalCount={books.length}
-              visibleCount={visibleBooks.length}
-            />
+            <>
+              <StatsPanel books={books} />
+              <FilterBar
+                filters={filters}
+                onChange={setFilters}
+                totalCount={books.length}
+                visibleCount={visibleBooks.length}
+              />
+            </>
           ) : null}
           <BookGrid
             books={visibleBooks}
