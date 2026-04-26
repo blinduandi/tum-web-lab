@@ -5,6 +5,7 @@ import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/cards.css";
 import "./styles/forms.css";
+import "./styles/filters.css";
 
 const container = document.getElementById("root");
 if (!container) throw new Error("#root element missing from index.html");

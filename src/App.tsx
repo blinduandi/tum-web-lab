@@ -1,10 +1,12 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { ThemeToggle } from "./components/ThemeToggle";
 import { BookGrid } from "./components/BookGrid";
 import { BookForm } from "./components/BookForm";
+import { FilterBar } from "./components/FilterBar";
 import { Modal } from "./components/Modal";
 import { useLibrary } from "./data/LibraryContext";
+import { applyFilters, DEFAULT_FILTERS } from "./data/filter";
 import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
 
 type EditorState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; book: Book };
@@ -13,6 +15,10 @@ export default function App() {
   const { books, loading, addBook, updateBook, toggleLike, deleteBook, setStatus } =
     useLibrary();
   const [editor, setEditor] = useState<EditorState>({ mode: "closed" });
+  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+
+  const visibleBooks = useMemo(() => applyFilters(books, filters), [books, filters]);
+  const hasAnyBooks = books.length > 0;
 
   const cycleStatus = useCallback(
     (id: string) => {
@@ -77,14 +83,28 @@ export default function App() {
       {loading ? (
         <p className="empty-state">Loading your library…</p>
       ) : (
-        <BookGrid
-          books={books}
-          emptyMessage="Your shelf is empty. Add a book to get started."
-          onToggleLike={toggleLike}
-          onDelete={handleDelete}
-          onCycleStatus={cycleStatus}
-          onEdit={handleEdit}
-        />
+        <>
+          {hasAnyBooks ? (
+            <FilterBar
+              filters={filters}
+              onChange={setFilters}
+              totalCount={books.length}
+              visibleCount={visibleBooks.length}
+            />
+          ) : null}
+          <BookGrid
+            books={visibleBooks}
+            emptyMessage={
+              hasAnyBooks
+                ? "No books match your filters. Try clearing them."
+                : "Your shelf is empty. Add a book to get started."
+            }
+            onToggleLike={toggleLike}
+            onDelete={handleDelete}
+            onCycleStatus={cycleStatus}
+            onEdit={handleEdit}
+          />
+        </>
       )}
 
       <Modal
