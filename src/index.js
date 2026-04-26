@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { parseArgs, HELP_TEXT } from "./cli.js";
+import { runUrl } from "./commands/url.js";
+import { runSearch } from "./commands/search.js";
 
 async function main() {
   let parsed;
@@ -16,9 +18,11 @@ async function main() {
       process.stdout.write(HELP_TEXT);
       return;
     case "url":
+      await runUrl(parsed.url, parsed.flags);
+      return;
     case "search":
-      console.error("go2web: not yet implemented");
-      process.exit(1);
+      await runSearch(parsed.query, parsed.flags);
+      return;
   }
 }
 
