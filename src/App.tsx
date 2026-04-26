@@ -1,15 +1,19 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { ThemeToggle } from "./components/ThemeToggle";
 import { BookGrid } from "./components/BookGrid";
+import { BookForm } from "./components/BookForm";
+import { Modal } from "./components/Modal";
 import { useLibrary } from "./data/LibraryContext";
-import { READING_STATUS_ORDER } from "./data/types";
+import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
+
+type EditorState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; book: Book };
 
 export default function App() {
-  const { books, loading, toggleLike, deleteBook, setStatus } = useLibrary();
+  const { books, loading, addBook, updateBook, toggleLike, deleteBook, setStatus } =
+    useLibrary();
+  const [editor, setEditor] = useState<EditorState>({ mode: "closed" });
 
-  // Cycle through reading -> to-read -> finished on click. Order matches
-  // READING_STATUS_ORDER so the visual progression is predictable.
   const cycleStatus = useCallback(
     (id: string) => {
       const book = books.find((b) => b.id === id);
@@ -21,11 +25,53 @@ export default function App() {
     [books, setStatus],
   );
 
+  const closeEditor = useCallback(() => setEditor({ mode: "closed" }), []);
+
+  const handleSubmit = useCallback(
+    async (draft: BookDraft) => {
+      if (editor.mode === "add") await addBook(draft);
+      else if (editor.mode === "edit") await updateBook(editor.book.id, draft);
+      closeEditor();
+    },
+    [editor, addBook, updateBook, closeEditor],
+  );
+
+  const handleEdit = useCallback(
+    (id: string) => {
+      const book = books.find((b) => b.id === id);
+      if (book) setEditor({ mode: "edit", book });
+    },
+    [books],
+  );
+
+  const handleDelete = useCallback(
+    (id: string) => {
+      const book = books.find((b) => b.id === id);
+      if (!book) return;
+      if (confirm(`Remove "${book.title}" from your library?`)) {
+        void deleteBook(id);
+      }
+    },
+    [books, deleteBook],
+  );
+
   return (
     <main className="app-shell">
       <header className="app-header">
-        <h1>Pagebound</h1>
-        <ThemeToggle />
+        <div>
+          <h1>Pagebound</h1>
+          <p className="app-subtitle">Your personal library, on the shelf next to the browser tab.</p>
+        </div>
+        <div className="app-header__actions">
+          <button
+            type="button"
+            className="button button--primary"
+            onClick={() => setEditor({ mode: "add" })}
+          >
+            + Add book
+          </button>
+          <ThemeToggle />
+        </div>
       </header>
 
       {loading ? (
@@ -35,13 +81,23 @@ export default function App() {
           books={books}
           emptyMessage="Your shelf is empty. Add a book to get started."
           onToggleLike={toggleLike}
-          onDelete={deleteBook}
+          onDelete={handleDelete}
           onCycleStatus={cycleStatus}
-          onEdit={() => {
-            /* edit modal lands in a follow-up commit */
-          }}
+          onEdit={handleEdit}
         />
       )}
+
+      <Modal
+        open={editor.mode !== "closed"}
+        title={editor.mode === "edit" ? "Edit book" : "Add a book"}
+        onClose={closeEditor}
+      >
+        <BookForm
+          initial={editor.mode === "edit" ? editor.book : null}
+          onSubmit={handleSubmit}
+          onCancel={closeEditor}
+        />
+      </Modal>
     </main>
   );
 }
