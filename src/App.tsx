@@ -6,6 +6,8 @@ import { BookForm } from "./components/BookForm";
 import { FilterBar } from "./components/FilterBar";
 import { Modal } from "./components/Modal";
 import { StatsPanel } from "./components/StatsPanel";
+import { EmptyState } from "./components/EmptyState";
+import { makeSeedBooks } from "./data/seed";
 import { useLibrary } from "./data/LibraryContext";
 import { applyFilters, DEFAULT_FILTERS } from "./data/filter";
 import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
@@ -13,8 +15,16 @@ import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
 type EditorState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; book: Book };
 
 export default function App() {
-  const { books, loading, addBook, updateBook, toggleLike, deleteBook, setStatus } =
-    useLibrary();
+  const {
+    books,
+    loading,
+    addBook,
+    updateBook,
+    toggleLike,
+    deleteBook,
+    setStatus,
+    resetWith,
+  } = useLibrary();
   const [editor, setEditor] = useState<EditorState>({ mode: "closed" });
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
 
@@ -83,26 +93,23 @@ export default function App() {
 
       {loading ? (
         <p className="empty-state">Loading your library…</p>
+      ) : !hasAnyBooks ? (
+        <EmptyState
+          onAddClick={() => setEditor({ mode: "add" })}
+          onLoadSample={() => void resetWith(makeSeedBooks())}
+        />
       ) : (
         <>
-          {hasAnyBooks ? (
-            <>
-              <StatsPanel books={books} />
-              <FilterBar
-                filters={filters}
-                onChange={setFilters}
-                totalCount={books.length}
-                visibleCount={visibleBooks.length}
-              />
-            </>
-          ) : null}
+          <StatsPanel books={books} />
+          <FilterBar
+            filters={filters}
+            onChange={setFilters}
+            totalCount={books.length}
+            visibleCount={visibleBooks.length}
+          />
           <BookGrid
             books={visibleBooks}
-            emptyMessage={
-              hasAnyBooks
-                ? "No books match your filters. Try clearing them."
-                : "Your shelf is empty. Add a book to get started."
-            }
+            emptyMessage="No books match your filters. Try clearing them."
             onToggleLike={toggleLike}
             onDelete={handleDelete}
             onCycleStatus={cycleStatus}
@@ -110,6 +117,10 @@ export default function App() {
           />
         </>
       )}
+
+      <footer className="app-footer">
+        Built for FAF Web Programming Lab 6 — data lives only in your browser.
+      </footer>
 
       <Modal
         open={editor.mode !== "closed"}

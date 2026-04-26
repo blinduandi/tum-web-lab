@@ -85,6 +85,47 @@ body {
   color: var(--text-muted);
 }
 
+.onboarding {
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  max-width: 540px;
+  margin: var(--space-6) auto 0;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.onboarding__icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--space-3);
+}
+
+.onboarding__title {
+  margin: 0 0 var(--space-2);
+}
+
+.onboarding__copy {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.onboarding__actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+footer.app-footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 .theme-toggle {
   display: inline-flex;
   align-items: center;
