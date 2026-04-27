@@ -1,6 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { ThemeToggle } from "./components/ThemeToggle";
+import { BackendToggle } from "./components/BackendToggle";
+import { SignInDialog } from "./components/SignInDialog";
 import { BookGrid } from "./components/BookGrid";
 import { BookForm } from "./components/BookForm";
 import { FilterBar } from "./components/FilterBar";
@@ -18,6 +20,10 @@ export default function App() {
   const {
     books,
     loading,
+    backend,
+    apiAuthRequired,
+    setBackend,
+    acknowledgeAuth,
     addBook,
     updateBook,
     toggleLike,
@@ -27,6 +33,28 @@ export default function App() {
   } = useLibrary();
   const [editor, setEditor] = useState<EditorState>({ mode: "closed" });
   const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const [signInOpen, setSignInOpen] = useState(false);
+
+  // The context flips this flag when an API call returns 401 — open the
+  // sign-in dialog so the user can mint a fresh token.
+  useEffect(() => {
+    if (apiAuthRequired) setSignInOpen(true);
+  }, [apiAuthRequired]);
+
+  function handleSignInCancel() {
+    setSignInOpen(false);
+    acknowledgeAuth();
+    // If the user opened the dialog by switching to remote and then bailed,
+    // drop them back to the local backend so the empty list isn't confusing.
+    if (apiAuthRequired) setBackend("local");
+  }
+
+  function handleSignedIn() {
+    setSignInOpen(false);
+    acknowledgeAuth();
+    // Force a reload by toggling backend through itself.
+    setBackend(backend);
+  }
 
   const visibleBooks = useMemo(() => applyFilters(books, filters), [books, filters]);
   const hasAnyBooks = books.length > 0;
@@ -87,6 +115,7 @@ export default function App() {
           >
             + Add book
           </button>
+          <BackendToggle onSignInRequest={() => setSignInOpen(true)} />
           <ThemeToggle />
         </div>
       </header>
@@ -132,6 +161,14 @@ export default function App() {
           onSubmit={handleSubmit}
           onCancel={closeEditor}
         />
+      </Modal>
+
+      <Modal
+        open={signInOpen}
+        title="Connect to Pagebound API"
+        onClose={handleSignInCancel}
+      >
+        <SignInDialog onSignedIn={handleSignedIn} onCancel={handleSignInCancel} />
       </Modal>
     </main>
   );
