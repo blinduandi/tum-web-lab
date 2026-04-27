@@ -102,23 +102,30 @@ export default function App() {
 
   return (
     <main className="app-shell">
-      <header className="app-header">
-        <div>
-          <h1>Pagebound</h1>
-          <p className="app-subtitle">Your personal library, on the shelf next to the browser tab.</p>
-        </div>
-        <div className="app-header__actions">
+      <nav className="app-nav" aria-label="Primary">
+        <div className="app-nav__left">
           <button
             type="button"
-            className="button button--primary"
+            className="pill-button"
             onClick={() => setEditor({ mode: "add" })}
           >
-            + Add book
+            + Add Book
           </button>
+        </div>
+        <div className="app-nav__brand">Pagebound · Lab 6</div>
+        <div className="app-nav__right">
           <BackendToggle onSignInRequest={() => setSignInOpen(true)} />
           <ThemeToggle />
         </div>
-      </header>
+      </nav>
+
+      <section className="app-hero">
+        <p className="app-hero__eyebrow">FAF Web Programming · Lab 6</p>
+        <h1 className="app-hero__wordmark">Pagebound</h1>
+        <p className="app-hero__caption">
+          A personal library — every book you’ve read, are reading, or want to read.
+        </p>
+      </section>
 
       {loading ? (
         <p className="empty-state">Loading your library…</p>
@@ -129,6 +136,14 @@ export default function App() {
         />
       ) : (
         <>
+          <header className="app-section-head">
+            <h2 className="app-section-head__title">The Shelf</h2>
+            <span className="app-section-head__caption">
+              {visibleBooks.length === books.length
+                ? `${books.length} volumes`
+                : `${visibleBooks.length} of ${books.length} volumes`}
+            </span>
+          </header>
           <StatsPanel books={books} />
           <FilterBar
             filters={filters}
@@ -138,7 +153,7 @@ export default function App() {
           />
           <BookGrid
             books={visibleBooks}
-            emptyMessage="No books match your filters. Try clearing them."
+            emptyMessage="No volumes match your filters."
             onToggleLike={toggleLike}
             onDelete={handleDelete}
             onCycleStatus={cycleStatus}
@@ -148,12 +163,12 @@ export default function App() {
       )}
 
       <footer className="app-footer">
-        Built for FAF Web Programming Lab 6 — data lives only in your browser.
+        Built for FAF Web Programming · Lab 6 · Data lives only in your browser
       </footer>
 
       <Modal
         open={editor.mode !== "closed"}
-        title={editor.mode === "edit" ? "Edit book" : "Add a book"}
+        title={editor.mode === "edit" ? "Edit Volume" : "Add A Volume"}
         onClose={closeEditor}
       >
         <BookForm

@@ -1,6 +1,5 @@
 // Tiny header control that flips between local and remote backends.
-// In local mode the icon is filled-in (you're "anchored" to your device);
-// in remote mode it shows a cloud (we're talking to the API).
+// "Local" = data lives in IndexedDB. "API" = data lives on the Lab 7 server.
 
 import { useLibrary } from "../data/LibraryContext";
 
@@ -22,13 +21,19 @@ export function BackendToggle({ onSignInRequest }: { onSignInRequest: () => void
   return (
     <button
       type="button"
-      className={`backend-toggle ${isRemote ? "is-remote" : ""}`}
+      className={`pill-button ${isRemote ? "is-active" : ""}`}
       onClick={handleClick}
-      title={isRemote ? "Connected to API — click to switch to local" : "Stored in browser — click to connect to API"}
+      title={
+        isRemote
+          ? "Connected to API — click to switch to local"
+          : "Stored in browser — click to connect to API"
+      }
       aria-pressed={isRemote}
     >
-      <span aria-hidden="true">{isRemote ? "☁" : "⌂"}</span>
-      <span className="backend-toggle__label">{isRemote ? "API" : "Local"}</span>
+      <span className="pill-button__glyph" aria-hidden="true">
+        {isRemote ? "☁" : "⌂"}
+      </span>
+      <span>{isRemote ? "API" : "Local"}</span>
     </button>
   );
 }
