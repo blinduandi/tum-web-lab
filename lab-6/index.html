@@ -4,12 +4,26 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0d1117" />
+    <meta name="theme-color" content="#000000" />
     <meta
       name="description"
       content="Pagebound — a personal library to track the books you've read, are reading, or want to read."
     />
-    <title>Pagebound</title>
+
+    <!--
+      Substitutes per DESIGN.md §3:
+        Bugatti Display    → Unbounded   (sculptural, geometric, architectural at scale)
+        Bugatti Monospace  → Space Mono  (telemetry-printout register for UI labels)
+        Bugatti Text       → Inter       (invisible body face)
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500&family=Space+Mono:wght@400;700&family=Inter:wght@400;500&display=swap"
+    />
+
+    <title>PAGEBOUND</title>
     <script>
       // Apply the saved theme before React mounts to avoid a flash of the
       // wrong palette. Mirrors the logic in src/theme/ThemeProvider.tsx.

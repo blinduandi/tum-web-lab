@@ -1,66 +1,89 @@
 /*
- * Design tokens. Two palettes (light + dark) selected by [data-theme] on
- * <html>. Component CSS only references the semantic variables below
- * (--surface, --text, ...) so a theme swap is a single attribute flip.
+ * Bugatti-inspired design tokens (DESIGN.md).
+ *
+ * Three-color palette, three radii (0 / 6px / 9999px), no shadows, no
+ * gradients, no accents. Two themes:
+ *
+ *   - dark (default): Velvet Black canvas, Showroom White text, Silver Mist tertiary
+ *   - light:          inverted — Showroom White canvas, Velvet Black text, Silver Mist tertiary
+ *
+ * Component CSS only references the semantic vars (--bg, --text, --mid),
+ * so a theme swap is a single attribute flip on <html>.
  */
 
 :root {
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
+  /* Type stack — substitutes per DESIGN.md §3 */
+  --font-display: "Unbounded", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Space Mono", ui-monospace, "SF Mono", Consolas, monospace;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.5rem;
-  --space-6: 2rem;
-  --space-8: 3rem;
+  /* Type scale — Bugatti hero pyramid (288 → 60 → 36 → body) */
+  --text-monumental: clamp(3.5rem, 12vw, 11rem); /* 56-176px hero "PAGEBOUND" */
+  --text-display-mid: clamp(2rem, 4vw, 3.75rem); /* 32-60px section heads    */
+  --text-section: 2.25rem;                       /* 36px                     */
+  --text-body-lead: 1.25rem;                     /* 20px                     */
+  --text-body: 1rem;                             /* 16px                     */
+  --text-compact: 0.875rem;                      /* 14px — caps tracking     */
+  --text-micro: 0.75rem;                         /* 12px — micro caps        */
 
-  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.06);
-  --shadow-md: 0 4px 14px rgb(0 0 0 / 0.08);
-  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.18);
+  /* Tracking — only two registers (DESIGN.md §3.principles) */
+  --track-caps: 0.1em;        /* ~1.4px @ 14px — primary caps */
+  --track-caps-tight: 0.08em; /* ~1.2px @ 12px — micro caps   */
 
-  --transition-fast: 120ms ease;
-  --transition-med: 220ms ease;
-}
+  /* Radii — exactly three (DESIGN.md §5) */
+  --radius-0: 0;
+  --radius-utility: 6px;
+  --radius-pill: 9999px;
 
-html[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f6f5f1;
-  --surface: #ffffff;
-  --surface-2: #faf9f5;
-  --border: #e6e3da;
-  --text: #1a1a1a;
-  --text-muted: #5b5b5b;
-  --accent: #6f4cff;
-  --accent-soft: #ece6ff;
-  --accent-text: #ffffff;
-  --danger: #c44141;
-  --like: #e0457b;
-  --success: #2f7d4d;
+  /* Spacing — six discrete steps (DESIGN.md §5) */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 12px;
+  --space-4: 36px;
+  --space-5: 48px;
+  --space-6: 64px;
+
+  /* Borders */
+  --hairline: 1px;
+  --vignette: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
+
+  /* Motion — quiet, never bouncy */
+  --transition-fast: 200ms ease;
+  --transition-med: 300ms ease;
 }
 
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0f1117;
-  --surface: #181b23;
-  --surface-2: #20242e;
-  --border: #2a2f3a;
-  --text: #ecedef;
-  --text-muted: #98a0ad;
-  --accent: #9d83ff;
-  --accent-soft: #2a224d;
-  --accent-text: #0f1117;
-  --danger: #ec6a6a;
-  --like: #ff6fa1;
-  --success: #61c98a;
+  --bg: #000000;
+  --text: #ffffff;
+  --mid: #999999;
+  /* Inverse pair — used when a button fills (primary pill on hover). */
+  --bg-inverse: #ffffff;
+  --text-inverse: #000000;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ffffff;
+  --text: #000000;
+  --mid: #999999;
+  --bg-inverse: #000000;
+  --text-inverse: #ffffff;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 400;
+  line-height: 1.5;
   transition:
     background var(--transition-med),
     color var(--transition-med);
+}
+
+::selection {
+  background: var(--text);
+  color: var(--bg);
 }
