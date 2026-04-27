@@ -1,0 +1,210 @@
+openapi: 3.0.3
+info:
+  title: Pagebound API
+  version: 1.0.0
+  description: |
+    REST back-end for the Pagebound book library (FAF Web Programming, Lab 7).
+
+    All `/books` endpoints require a JWT in the `Authorization` header. Get one
+    from `POST /token` (or `GET /token?role=...`). For the lab, tokens expire
+    after 1 minute.
+
+    | Role   | Permissions          |
+    |--------|----------------------|
+    | GUEST  | (none)               |
+    | READER | READ                 |
+    | EDITOR | READ, WRITE          |
+    | ADMIN  | READ, WRITE, DELETE  |
+servers:
+  - url: http://localhost:4000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Book:
+      type: object
+      required: [id, title, status, createdAt, updatedAt]
+      properties:
+        id:        { type: string }
+        title:     { type: string }
+        author:    { type: string }
+        genre:     { type: string }
+        year:      { type: integer, nullable: true }
+        pages:     { type: integer, nullable: true }
+        status:    { type: string, enum: [to-read, reading, finished] }
+        rating:    { type: number, minimum: 0, maximum: 5 }
+        liked:     { type: boolean }
+        notes:     { type: string }
+        coverUrl:  { type: string }
+        createdAt: { type: integer, description: "Epoch ms" }
+        updatedAt: { type: integer, description: "Epoch ms" }
+    BookInput:
+      type: object
+      required: [title]
+      properties:
+        title:    { type: string }
+        author:   { type: string }
+        genre:    { type: string }
+        year:     { type: integer, nullable: true }
+        pages:    { type: integer, nullable: true }
+        status:   { type: string, enum: [to-read, reading, finished] }
+        rating:   { type: number, minimum: 0, maximum: 5 }
+        liked:    { type: boolean }
+        notes:    { type: string }
+        coverUrl: { type: string }
+    Page:
+      type: object
+      properties:
+        items: { type: array, items: { $ref: "#/components/schemas/Book" } }
+        total: { type: integer }
+        skip:  { type: integer }
+        limit: { type: integer }
+    TokenResponse:
+      type: object
+      properties:
+        token:       { type: string }
+        tokenType:   { type: string, example: Bearer }
+        expiresIn:   { type: integer, example: 60 }
+        role:        { type: string }
+        permissions: { type: array, items: { type: string } }
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+paths:
+  /token:
+    post:
+      summary: Issue a JWT for the requested role / permissions
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:        { type: string, example: EDITOR }
+                permissions:
+                  type: array
+                  items: { type: string }
+                  example: [READ, WRITE]
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "400":
+          description: Invalid role
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    get:
+      summary: Issue a JWT via query string (alternate to POST)
+      tags: [Auth]
+      parameters:
+        - in: query
+          name: role
+          schema: { type: string }
+          example: ADMIN
+        - in: query
+          name: permissions
+          schema: { type: string, description: "Comma-separated list" }
+          example: READ,WRITE
+      responses:
+        "200":
+          description: Token issued
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TokenResponse" }
+        "400":
+          description: Invalid role
+  /books:
+    get:
+      summary: List books (paginated)
+      tags: [Books]
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: skip
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+      responses:
+        "200":
+          description: A page of books
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Page" }
+        "401": { description: Missing or invalid token }
+        "403": { description: Token lacks READ permission }
+    post:
+      summary: Create a book
+      tags: [Books]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "400": { description: Invalid input }
+        "401": { description: Missing or invalid token }
+        "403": { description: Token lacks WRITE permission }
+  /books/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema: { type: string }
+    get:
+      summary: Get a single book
+      tags: [Books]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "200":
+          description: The book
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "401": { description: Missing or invalid token }
+        "403": { description: Token lacks READ permission }
+        "404": { description: No book with that id }
+    put:
+      summary: Update a book (partial)
+      tags: [Books]
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/BookInput" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Book" }
+        "400": { description: Invalid input }
+        "401": { description: Missing or invalid token }
+        "403": { description: Token lacks WRITE permission }
+        "404": { description: No book with that id }
+    delete:
+      summary: Remove a book
+      tags: [Books]
+      security: [{ bearerAuth: [] }]
+      responses:
+        "204": { description: Deleted }
+        "401": { description: Missing or invalid token }
+        "403": { description: Token lacks DELETE permission }
+        "404": { description: No book with that id }
