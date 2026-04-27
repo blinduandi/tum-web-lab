@@ -1,42 +1,29 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ThemeToggle } from "./components/ThemeToggle";
 import { BackendToggle } from "./components/BackendToggle";
 import { SignInDialog } from "./components/SignInDialog";
-import { BookGrid } from "./components/BookGrid";
-import { BookForm } from "./components/BookForm";
-import { FilterBar } from "./components/FilterBar";
 import { Modal } from "./components/Modal";
-import { StatsPanel } from "./components/StatsPanel";
-import { EmptyState } from "./components/EmptyState";
-import { makeSeedBooks } from "./data/seed";
-import { useLibrary } from "./data/LibraryContext";
-import { applyFilters, DEFAULT_FILTERS } from "./data/filter";
-import { READING_STATUS_ORDER, type Book, type BookDraft } from "./data/types";
 
-type EditorState = { mode: "closed" } | { mode: "add" } | { mode: "edit"; book: Book };
+import { useLibrary } from "./data/LibraryContext";
+import { Home } from "./views/Home";
+import { Library } from "./views/Library";
+import { useRoute, type Route } from "./views/useRoute";
 
 export default function App() {
-  const {
-    books,
-    loading,
-    backend,
-    apiAuthRequired,
-    setBackend,
-    acknowledgeAuth,
-    addBook,
-    updateBook,
-    toggleLike,
-    deleteBook,
-    setStatus,
-    resetWith,
-  } = useLibrary();
-  const [editor, setEditor] = useState<EditorState>({ mode: "closed" });
-  const [filters, setFilters] = useState(DEFAULT_FILTERS);
+  const { backend, apiAuthRequired, setBackend, acknowledgeAuth } = useLibrary();
+  const { route, navigate } = useRoute();
   const [signInOpen, setSignInOpen] = useState(false);
 
-  // The context flips this flag when an API call returns 401 — open the
-  // sign-in dialog so the user can mint a fresh token.
+  // The Library view exposes its "open Add" handler back up to App so the
+  // top-level "+ Add" button in the nav can trigger it from anywhere.
+  const addRef = useRef<(() => void) | null>(null);
+  const openAdd = useCallback(() => {
+    if (route !== "library") navigate("library");
+    // Defer one tick so Library has a chance to register if we just routed.
+    setTimeout(() => addRef.current?.(), 0);
+  }, [route, navigate]);
+
   useEffect(() => {
     if (apiAuthRequired) setSignInOpen(true);
   }, [apiAuthRequired]);
@@ -44,139 +31,48 @@ export default function App() {
   function handleSignInCancel() {
     setSignInOpen(false);
     acknowledgeAuth();
-    // If the user opened the dialog by switching to remote and then bailed,
-    // drop them back to the local backend so the empty list isn't confusing.
     if (apiAuthRequired) setBackend("local");
   }
 
   function handleSignedIn() {
     setSignInOpen(false);
     acknowledgeAuth();
-    // Force a reload by toggling backend through itself.
     setBackend(backend);
   }
 
-  const visibleBooks = useMemo(() => applyFilters(books, filters), [books, filters]);
-  const hasAnyBooks = books.length > 0;
-
-  const cycleStatus = useCallback(
-    (id: string) => {
-      const book = books.find((b) => b.id === id);
-      if (!book) return;
-      const i = READING_STATUS_ORDER.indexOf(book.status);
-      const next = READING_STATUS_ORDER[(i + 1) % READING_STATUS_ORDER.length];
-      void setStatus(id, next);
-    },
-    [books, setStatus],
-  );
-
-  const closeEditor = useCallback(() => setEditor({ mode: "closed" }), []);
-
-  const handleSubmit = useCallback(
-    async (draft: BookDraft) => {
-      if (editor.mode === "add") await addBook(draft);
-      else if (editor.mode === "edit") await updateBook(editor.book.id, draft);
-      closeEditor();
-    },
-    [editor, addBook, updateBook, closeEditor],
-  );
-
-  const handleEdit = useCallback(
-    (id: string) => {
-      const book = books.find((b) => b.id === id);
-      if (book) setEditor({ mode: "edit", book });
-    },
-    [books],
-  );
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      const book = books.find((b) => b.id === id);
-      if (!book) return;
-      if (confirm(`Remove "${book.title}" from your library?`)) {
-        void deleteBook(id);
-      }
-    },
-    [books, deleteBook],
-  );
-
   return (
-    <main className="app-shell">
-      <nav className="app-nav" aria-label="Primary">
-        <div className="app-nav__left">
-          <button
-            type="button"
-            className="pill-button"
-            onClick={() => setEditor({ mode: "add" })}
-          >
-            + Add Book
-          </button>
-        </div>
-        <div className="app-nav__brand">Pagebound · Lab 6</div>
-        <div className="app-nav__right">
-          <BackendToggle onSignInRequest={() => setSignInOpen(true)} />
-          <ThemeToggle />
-        </div>
-      </nav>
+    <div className="app">
+      <TopNav
+        route={route}
+        onNavigate={navigate}
+        onAdd={openAdd}
+        onSignInRequest={() => setSignInOpen(true)}
+      />
 
-      <section className="app-hero">
-        <p className="app-hero__eyebrow">FAF Web Programming · Lab 6</p>
-        <h1 className="app-hero__wordmark">Pagebound</h1>
-        <p className="app-hero__caption">
-          A personal library — every book you’ve read, are reading, or want to read.
-        </p>
-      </section>
-
-      {loading ? (
-        <p className="empty-state">Loading your library…</p>
-      ) : !hasAnyBooks ? (
-        <EmptyState
-          onAddClick={() => setEditor({ mode: "add" })}
-          onLoadSample={() => void resetWith(makeSeedBooks())}
-        />
+      {route === "home" ? (
+        <Home onEnter={() => navigate("library")} />
       ) : (
-        <>
-          <header className="app-section-head">
-            <h2 className="app-section-head__title">The Shelf</h2>
-            <span className="app-section-head__caption">
-              {visibleBooks.length === books.length
-                ? `${books.length} volumes`
-                : `${visibleBooks.length} of ${books.length} volumes`}
+        <main className="library-shell">
+          <Library
+            onOpenAdd={openAdd}
+            registerAddHandler={(handler) => {
+              addRef.current = handler;
+            }}
+          />
+          <footer className="library-footer">
+            <span className="caption-mono caption-mono--mid">
+              Built for FAF Web Programming · Lab 06
             </span>
-          </header>
-          <StatsPanel books={books} />
-          <FilterBar
-            filters={filters}
-            onChange={setFilters}
-            totalCount={books.length}
-            visibleCount={visibleBooks.length}
-          />
-          <BookGrid
-            books={visibleBooks}
-            emptyMessage="No volumes match your filters."
-            onToggleLike={toggleLike}
-            onDelete={handleDelete}
-            onCycleStatus={cycleStatus}
-            onEdit={handleEdit}
-          />
-        </>
+            <button
+              type="button"
+              className="link-button"
+              onClick={() => navigate("home")}
+            >
+              ← Back to homepage
+            </button>
+          </footer>
+        </main>
       )}
-
-      <footer className="app-footer">
-        Built for FAF Web Programming · Lab 6 · Data lives only in your browser
-      </footer>
-
-      <Modal
-        open={editor.mode !== "closed"}
-        title={editor.mode === "edit" ? "Edit Volume" : "Add A Volume"}
-        onClose={closeEditor}
-      >
-        <BookForm
-          initial={editor.mode === "edit" ? editor.book : null}
-          onSubmit={handleSubmit}
-          onCancel={closeEditor}
-        />
-      </Modal>
 
       <Modal
         open={signInOpen}
@@ -185,6 +81,44 @@ export default function App() {
       >
         <SignInDialog onSignedIn={handleSignedIn} onCancel={handleSignInCancel} />
       </Modal>
-    </main>
+    </div>
+  );
+}
+
+interface TopNavProps {
+  route: Route;
+  onNavigate: (r: Route) => void;
+  onAdd: () => void;
+  onSignInRequest: () => void;
+}
+
+function TopNav({ route, onNavigate, onAdd, onSignInRequest }: TopNavProps) {
+  return (
+    <nav className="top-nav" aria-label="Primary">
+      <div className="top-nav__left">
+        <button
+          type="button"
+          className={`nav-link ${route === "home" ? "is-active" : ""}`}
+          onClick={() => onNavigate("home")}
+        >
+          Home
+        </button>
+        <button
+          type="button"
+          className={`nav-link ${route === "library" ? "is-active" : ""}`}
+          onClick={() => onNavigate("library")}
+        >
+          Library
+        </button>
+      </div>
+      <div className="top-nav__brand">Pagebound</div>
+      <div className="top-nav__right">
+        <button type="button" className="nav-link" onClick={onAdd}>
+          + Add
+        </button>
+        <BackendToggle onSignInRequest={onSignInRequest} />
+        <ThemeToggle />
+      </div>
+    </nav>
   );
 }
