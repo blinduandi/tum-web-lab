@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d1117" />
+    <meta
+      name="description"
+      content="Pagebound — a personal library to track the books you've read, are reading, or want to read."
+    />
+    <title>Pagebound</title>
+    <script>
+      // Apply the saved theme before React mounts to avoid a flash of the
+      // wrong palette. Mirrors the logic in src/theme/ThemeProvider.tsx.
+      (function () {
+        try {
+          var saved = localStorage.getItem("pagebound:theme");
+          var preferred =
+            saved ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light");
+          document.documentElement.dataset.theme = preferred;
+        } catch (_) {
+          /* localStorage may be blocked — let CSS defaults handle it */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
