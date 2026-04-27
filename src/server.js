@@ -2,6 +2,7 @@ import express from "express";
 
 import { config } from "./config.js";
 import { tokenRouter } from "./routes/token.js";
+import { booksRouter } from "./routes/books.js";
 
 const app = express();
 app.use(express.json());
@@ -17,6 +18,7 @@ app.get("/", (_req, res) => {
 app.get("/health", (_req, res) => res.json({ ok: true, ts: Date.now() }));
 
 app.use(tokenRouter);
+app.use(booksRouter);
 
 app.listen(config.port, () => {
   console.log(`pagebound-api listening on http://localhost:${config.port}`);
