@@ -1,16 +1,16 @@
 /*
- * Filter bar. Hairline-bordered strip, mono UPPERCASE controls. The
- * segmented status filter behaves like Bugatti's pill-button family —
- * one item white-filled, the rest transparent with mid borders.
+ * Filter bar. Two flat hairline-separated rows. No bordered box around
+ * the whole control — that's what made it feel like a settings panel.
  */
 
 .filter-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-bottom: var(--space-4);
-  padding: var(--space-3);
-  border: var(--hairline) solid var(--mid);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) 0;
+  border-top: var(--hairline) solid var(--mid);
+  border-bottom: var(--hairline) solid var(--mid);
 }
 
 .filter-bar__row {
@@ -26,10 +26,10 @@
 }
 
 .filter-bar__search {
-  flex: 1 1 240px;
-  padding: var(--space-2) var(--space-3);
-  border: var(--hairline) solid var(--mid);
-  border-radius: var(--radius-utility);
+  flex: 1 1 280px;
+  padding: var(--space-2) 0;
+  border: none;
+  border-bottom: var(--hairline) solid var(--mid);
   background: transparent;
   color: var(--text);
   font-family: var(--font-body);
@@ -47,42 +47,39 @@
 
 .filter-bar__search:focus {
   outline: none;
-  border-color: var(--text);
+  border-bottom-color: var(--text);
 }
 
 /* ── Segmented status filter ─────────────────────────────────────── */
 
 .segmented {
   display: inline-flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .segmented__btn {
-  padding: var(--space-2) var(--space-3);
+  padding: 0;
   background: transparent;
-  border: var(--hairline) solid var(--mid);
-  border-radius: var(--radius-pill);
-  color: var(--text);
+  border: none;
+  color: var(--mid);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--track-caps-tight);
   text-transform: uppercase;
   cursor: pointer;
-  transition:
-    border-color var(--transition-fast),
-    background var(--transition-fast),
-    color var(--transition-fast);
+  transition: color var(--transition-fast);
 }
 
 .segmented__btn:hover {
-  border-color: var(--text);
+  color: var(--text);
 }
 
 .segmented__btn.is-active {
-  background: var(--text);
-  color: var(--bg);
-  border-color: var(--text);
+  color: var(--text);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1px;
 }
 
 /* ── Liked-only checkbox ─────────────────────────────────────────── */
@@ -92,11 +89,15 @@
   align-items: center;
   gap: var(--space-2);
   cursor: pointer;
-  color: var(--text);
+  color: var(--mid);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--track-caps-tight);
   text-transform: uppercase;
+}
+
+.checkbox:hover {
+  color: var(--text);
 }
 
 .checkbox input {
@@ -109,9 +110,12 @@
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: border-color var(--transition-fast);
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
 }
 
+.checkbox:hover input,
 .checkbox input:hover {
   border-color: var(--text);
 }
@@ -142,9 +146,8 @@
 }
 
 .filter-bar__sort select {
-  padding: var(--space-1) var(--space-3);
-  border: var(--hairline) solid var(--mid);
-  border-radius: var(--radius-utility);
+  padding: 0 var(--space-3) 0 0;
+  border: none;
   background: transparent;
   color: var(--text);
   font-family: var(--font-mono);
@@ -153,19 +156,23 @@
   text-transform: uppercase;
   appearance: none;
   cursor: pointer;
-  transition: border-color var(--transition-fast);
+  transition: color var(--transition-fast);
   background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
     linear-gradient(135deg, currentColor 50%, transparent 50%);
-  background-position: calc(100% - 12px) 50%, calc(100% - 7px) 50%;
+  background-position: calc(100%) 50%, calc(100% - 5px) 50%;
   background-size: 5px 5px, 5px 5px;
   background-repeat: no-repeat;
-  padding-right: var(--space-4);
 }
 
 .filter-bar__sort select:hover,
 .filter-bar__sort select:focus {
   outline: none;
-  border-color: var(--text);
+  color: var(--text);
+}
+
+.filter-bar__sort option {
+  background: var(--bg);
+  color: var(--text);
 }
 
 .filter-bar__count {
