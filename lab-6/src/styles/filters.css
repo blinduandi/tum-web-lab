@@ -1,12 +1,16 @@
+/*
+ * Filter bar. Hairline-bordered strip, mono UPPERCASE controls. The
+ * segmented status filter behaves like Bugatti's pill-button family —
+ * one item white-filled, the rest transparent with mid borders.
+ */
+
 .filter-bar {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  margin-bottom: var(--space-5);
-  padding: var(--space-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  background: var(--surface);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3);
+  border: var(--hairline) solid var(--mid);
 }
 
 .filter-bar__row {
@@ -17,97 +21,158 @@
 }
 
 .filter-bar__row--meta {
-  border-top: 1px dashed var(--border);
+  border-top: var(--hairline) solid var(--mid);
   padding-top: var(--space-3);
 }
 
 .filter-bar__search {
   flex: 1 1 240px;
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  background: transparent;
   color: var(--text);
-  font: inherit;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  transition: border-color var(--transition-fast);
+}
+
+.filter-bar__search::placeholder {
+  color: var(--mid);
+  font-family: var(--font-mono);
+  font-size: var(--text-compact);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
 }
 
 .filter-bar__search:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text);
 }
+
+/* ── Segmented status filter ─────────────────────────────────────── */
 
 .segmented {
   display: inline-flex;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  gap: var(--space-2);
+  flex-wrap: wrap;
 }
 
 .segmented__btn {
   padding: var(--space-2) var(--space-3);
   background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font: inherit;
-  font-size: 0.85rem;
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-pill);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
   cursor: pointer;
   transition:
+    border-color var(--transition-fast),
     background var(--transition-fast),
     color var(--transition-fast);
 }
 
-.segmented__btn + .segmented__btn {
-  border-left: 1px solid var(--border);
-}
-
 .segmented__btn:hover {
-  color: var(--text);
+  border-color: var(--text);
 }
 
 .segmented__btn.is-active {
-  background: var(--accent);
-  color: var(--accent-text);
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
 }
+
+/* ── Liked-only checkbox ─────────────────────────────────────────── */
 
 .checkbox {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 0.9rem;
   cursor: pointer;
-  color: var(--text-muted);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
 }
 
 .checkbox input {
-  accent-color: var(--accent);
-  width: 16px;
-  height: 16px;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border: var(--hairline) solid var(--mid);
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: border-color var(--transition-fast);
 }
+
+.checkbox input:hover {
+  border-color: var(--text);
+}
+
+.checkbox input:checked {
+  background: var(--text);
+  border-color: var(--text);
+}
+
+.checkbox input:checked::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  background: var(--bg);
+}
+
+/* ── Sort selector ───────────────────────────────────────────────── */
 
 .filter-bar__sort {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: 0.9rem;
-  color: var(--text-muted);
+  color: var(--mid);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
 }
 
 .filter-bar__sort select {
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
+  padding: var(--space-1) var(--space-3);
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  background: transparent;
   color: var(--text);
-  font: inherit;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  appearance: none;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 12px) 50%, calc(100% - 7px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--space-4);
+}
+
+.filter-bar__sort select:hover,
+.filter-bar__sort select:focus {
+  outline: none;
+  border-color: var(--text);
 }
 
 .filter-bar__count {
   margin: 0 0 0 auto;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  color: var(--mid);
 }

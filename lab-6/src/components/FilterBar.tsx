@@ -12,9 +12,9 @@ interface FilterBarProps {
 }
 
 const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: "recent", label: "Recently updated" },
-  { value: "title", label: "Title (A-Z)" },
-  { value: "author", label: "Author (A-Z)" },
+  { value: "recent", label: "Recent" },
+  { value: "title", label: "Title A–Z" },
+  { value: "author", label: "Author A–Z" },
   { value: "year", label: "Year (newest)" },
 ];
 
@@ -80,7 +80,7 @@ export function FilterBar({ filters, onChange, totalCount, visibleCount }: Filte
 
         <p className="filter-bar__count" aria-live="polite">
           {visibleCount === totalCount
-            ? `${totalCount} book${totalCount === 1 ? "" : "s"}`
+            ? `${totalCount} volume${totalCount === 1 ? "" : "s"}`
             : `${visibleCount} of ${totalCount}`}
         </p>
       </div>
