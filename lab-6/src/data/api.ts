@@ -6,7 +6,13 @@ import type { Book, BookDraft } from "./types";
 
 const TOKEN_KEY = "pagebound:apiToken";
 const BASE_URL_KEY = "pagebound:apiBase";
-const DEFAULT_BASE = "http://localhost:4000";
+
+// Resolution order:
+//   1. localStorage["pagebound:apiBase"]        (user override via Sign-In dialog)
+//   2. import.meta.env.VITE_API_BASE            (build-time env, set in Vercel)
+//   3. http://localhost:4000                    (local dev fallback)
+const DEFAULT_BASE =
+  (import.meta.env.VITE_API_BASE as string | undefined) || "http://localhost:4000";
 
 export class ApiError extends Error {
   status: number;
