@@ -43,7 +43,7 @@ export function SignInDialog({ onSignedIn, onCancel }: SignInDialogProps) {
       </p>
 
       <label className="field">
-        <span>API base URL</span>
+        <span>API Base URL</span>
         <input
           type="url"
           required
@@ -67,10 +67,10 @@ export function SignInDialog({ onSignedIn, onCancel }: SignInDialogProps) {
       </label>
 
       <ul className="role-legend">
-        <li><b>GUEST</b> — no permissions</li>
-        <li><b>READER</b> — can read books</li>
-        <li><b>EDITOR</b> — can read + create + update</li>
-        <li><b>ADMIN</b> — full CRUD including delete</li>
+        <li><b>GUEST</b> No permissions</li>
+        <li><b>READER</b> Read</li>
+        <li><b>EDITOR</b> Read + Write</li>
+        <li><b>ADMIN</b> Read + Write + Delete</li>
       </ul>
 
       {error ? <p className="form-error">{error}</p> : null}
@@ -80,7 +80,7 @@ export function SignInDialog({ onSignedIn, onCancel }: SignInDialogProps) {
           Cancel
         </button>
         <button type="submit" className="button button--primary" disabled={busy}>
-          {busy ? "Signing in…" : "Sign in"}
+          {busy ? "Signing In" : "Sign In"}
         </button>
       </div>
     </form>

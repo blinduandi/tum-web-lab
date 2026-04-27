@@ -15,6 +15,16 @@ The `main` branch deploys automatically to GitHub Pages. After enabling Pages in
 - **IndexedDB** for persistence — no backend, no third-party storage
 - Hand-rolled CSS with light/dark design tokens — no UI framework
 
+## Design language
+
+The visual system is modeled on Bugatti.com (see `DESIGN.md` at the repo root). The discipline:
+
+- **Three-color palette** — `#000000`, `#ffffff`, `#999999`. No accent. The covers themselves are the only color on the page.
+- **Three radii** — `0`, `6px`, `9999px`. Nothing in between.
+- **Typography is hierarchy** — Unbounded for monumental display ("Pagebound" sets at up to 11rem), Space Mono UPPERCASE for every UI label, Inter for body. All weights are 400; scale is the only emphasis device.
+- **No shadows, no gradients** except the bottom-up vignette over imagery for legibility.
+- **Mono caps everywhere** — every button, nav item, status pill, and caption runs in Space Mono UPPERCASE with 1.2–1.4px tracking.
+
 ## Features
 
 - **Add / edit / remove books** with a modal form (title, author, genre, year, pages, cover URL, status, notes)
