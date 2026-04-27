@@ -27,6 +27,8 @@ The visual system is modeled on Bugatti.com (see `DESIGN.md` at the repo root). 
 
 ## Features
 
+- **Cinematic homepage** at `#/` — five scroll-driven chapters: hero with monumental wordmark, manifesto, horizontal cover wall, featured volume (your currently-reading book), closing CTA
+- **Library** at `#/library` — the working CRUD surface
 - **Add / edit / remove books** with a modal form (title, author, genre, year, pages, cover URL, status, notes)
 - **Like** any book with a single click
 - **Status tracking** (`To read`, `Reading`, `Finished`) — click the pill on a card to cycle, or pick from the form
