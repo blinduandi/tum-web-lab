@@ -30,12 +30,32 @@ The `main` branch deploys automatically to GitHub Pages. After enabling Pages in
 
 ## Persistence model
 
-All state lives in two places:
+Pagebound has two backends, picked by the **Local / API** toggle in the header:
+
+### Local mode (default)
+
+State lives in two places:
 
 1. **IndexedDB** (`pagebound` database, `books` store) — every CRUD action mirrors to disk, so your shelf survives reloads, browser restarts, and laptop reboots.
 2. **`localStorage["pagebound:theme"]`** — just the chosen theme, so the boot script in `index.html` can apply it before React mounts.
 
 Open DevTools → Application → IndexedDB → `pagebound` to see the raw data.
+
+### API mode (Lab 7 integration)
+
+When the cloud icon in the header is active, all CRUD calls go to the [Lab 7 REST API](https://github.com/blinduandi/tum-web-lab7). On the first switch, a sign-in dialog asks for a role (READER / EDITOR / ADMIN) and mints a JWT via `POST /token`. The token is stored in `localStorage["pagebound:apiToken"]` and sent as `Authorization: Bearer …` on every request. Tokens expire after 60 seconds; when a 401 comes back the dialog reopens automatically.
+
+To run the full stack locally:
+
+```sh
+# in Lab 7
+npm install && npm start          # http://localhost:4000
+
+# in Lab 6
+npm install && npm run dev        # http://localhost:5173/pagebound/
+```
+
+Click the Local / API toggle, sign in, and your CRUD now hits the real API.
 
 ## User flows
 
