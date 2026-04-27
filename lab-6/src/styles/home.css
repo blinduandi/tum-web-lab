@@ -1,19 +1,24 @@
 /*
- * Cinematic homepage — five chapters that read like film. Each chapter is
- * tall enough to own the viewport and quiet enough to make the next one
- * feel like an arrival. No grids, no cards, no boxes.
+ * Cinematic homepage — five chapters that read like film. Each chapter
+ * owns its viewport without overflowing it: every display headline is
+ * clamped against BOTH `vw` (so it shrinks on narrow screens) AND `vh`
+ * (so it doesn't tower past a short window) AND a hard pixel ceiling
+ * (so it never goes wider than the substitute typeface can carry).
  *
- * Chapter primitives
- *   .chapter           full-height section, position:relative, overflow safety
- *   .chapter__corner   absolutely-positioned mono-caps annotation slot
+ * The substitute (Unbounded) is wider than the proprietary Bugatti
+ * Display face, so the DESIGN.md note caps display moments at ~104–
+ * 128px on most viewports. We only push above that on very wide screens
+ * for the single-word "Pagebound" hero.
  */
 
 /* ── Shared chapter shell ─────────────────────────────────────────── */
 
 .chapter {
   position: relative;
-  min-height: 100vh;
-  padding: clamp(48px, 6vw, 120px);
+  /* svh covers mobile browser chrome; min-height allows content overflow */
+  min-height: 100svh;
+  padding-block: clamp(96px, 12vh, 180px);
+  padding-inline: clamp(24px, 5vw, 96px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,22 +26,32 @@
   border-bottom: var(--hairline) solid var(--mid);
 }
 
+/* Chapter corner annotations — UPPERCASE mono captions in the four
+ * corners. Hide on really narrow screens to keep content centered. */
 .chapter__corner {
   position: absolute;
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  pointer-events: none;
+  max-width: 40%;
 }
 
-.chapter__corner--tl { top: clamp(24px, 3vw, 48px); left: clamp(24px, 3vw, 48px); }
-.chapter__corner--tr { top: clamp(24px, 3vw, 48px); right: clamp(24px, 3vw, 48px); align-items: flex-end; }
-.chapter__corner--bl { bottom: clamp(24px, 3vw, 48px); left: clamp(24px, 3vw, 48px); }
-.chapter__corner--br { bottom: clamp(24px, 3vw, 48px); right: clamp(24px, 3vw, 48px); align-items: flex-end; }
+.chapter__corner--tl { top: clamp(20px, 3vw, 36px); left: clamp(20px, 3vw, 36px); }
+.chapter__corner--tr { top: clamp(20px, 3vw, 36px); right: clamp(20px, 3vw, 36px); align-items: flex-end; text-align: right; }
+.chapter__corner--bl { bottom: clamp(20px, 3vw, 36px); left: clamp(20px, 3vw, 36px); }
+.chapter__corner--br { bottom: clamp(20px, 3vw, 36px); right: clamp(20px, 3vw, 36px); align-items: flex-end; text-align: right; }
 .chapter__corner--bc {
-  bottom: clamp(24px, 3vw, 48px);
+  bottom: clamp(20px, 3vw, 36px);
   left: 50%;
   transform: translateX(-50%);
   align-items: center;
+  text-align: center;
+}
+
+/* Re-enable pointer events on actual buttons inside corners. */
+.chapter__corner button {
+  pointer-events: auto;
 }
 
 /* ── Reusable type primitives ─────────────────────────────────────── */
@@ -49,6 +64,7 @@
   text-transform: uppercase;
   color: var(--text);
   margin: 0;
+  line-height: 1.4;
 }
 
 .caption-mono--mid {
@@ -57,7 +73,7 @@
 
 .display-mid {
   font-family: var(--font-display);
-  font-size: var(--text-display-mid);
+  font-size: clamp(1.75rem, 4vw, 3rem);
   font-weight: 400;
   line-height: 1.05;
   letter-spacing: -0.01em;
@@ -71,16 +87,15 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding-top: clamp(96px, 12vw, 200px);
-  padding-bottom: clamp(96px, 12vw, 200px);
 }
 
 .hero {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(24px, 3vw, 48px);
-  max-width: min(100%, 1600px);
+  gap: clamp(20px, 3vw, 36px);
+  width: 100%;
+  max-width: 100%;
 }
 
 .hero__overline {
@@ -90,17 +105,34 @@
 .hero__wordmark {
   font-family: var(--font-display);
   font-weight: 400;
-  /* Architectural: scales from ~64px on phones to ~248px on ultra-wide */
-  font-size: clamp(4rem, 17vw, 15.5rem);
-  line-height: 0.92;
+  /* "Pagebound" is 9 letters in Unbounded ≈ 4.7 × font-size wide.
+   * The clamp + min() formula keeps it under 92% of viewport width
+   * AND under 22vh AND under a 14rem (224px) hard ceiling. */
+  font-size: min(13.5vw, 22vh, 14rem);
+  line-height: 1.0;
   letter-spacing: -0.04em;
   text-transform: uppercase;
   margin: 0;
+  width: 100%;
+  max-width: 100%;
+  /* Defensive — the substitute is wide; if math somewhere disagrees, let
+   * the browser scale rather than overflow. */
+  word-break: keep-all;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+/* Below 380px even the min-clamp can blow out — slow it down further. */
+@media (max-width: 380px) {
+  .hero__wordmark {
+    font-size: 13vw;
+  }
 }
 
 .hero__sub {
   font-family: var(--font-body);
-  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  font-size: clamp(0.95rem, 1.4vw, 1.25rem);
   line-height: 1.4;
   color: var(--mid);
   max-width: 56ch;
@@ -110,35 +142,38 @@
 /* ── Chapter 2 · Manifesto ────────────────────────────────────────── */
 
 .chapter--manifesto {
-  align-items: center;
-  justify-content: flex-start;
+  align-items: stretch;
+  justify-content: center;
   flex-direction: column;
   text-align: left;
-  padding-top: clamp(96px, 14vh, 220px);
 }
 
 .manifesto {
   display: flex;
   flex-direction: column;
-  gap: clamp(24px, 3vw, 56px);
+  gap: clamp(16px, 2.5vw, 36px);
   width: 100%;
   max-width: 1480px;
+  margin: 0 auto;
 }
 
 .manifesto__line {
   display: grid;
-  grid-template-columns: clamp(48px, 6vw, 96px) 1fr;
+  grid-template-columns: clamp(40px, 5vw, 72px) 1fr;
   align-items: baseline;
-  gap: clamp(16px, 3vw, 64px);
+  gap: clamp(16px, 3vw, 56px);
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.25rem, 7vw, 6.5rem);
+  /* Cap matches the Unbounded-substitute guidance (~104px). */
+  font-size: clamp(2rem, 6.5vw, 6rem);
   line-height: 1.0;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   margin: 0;
   border-top: var(--hairline) solid var(--mid);
-  padding-top: clamp(16px, 2vw, 32px);
+  padding-top: clamp(12px, 1.5vw, 24px);
+  /* Allow long content to wrap onto a second line predictably. */
+  overflow-wrap: break-word;
 }
 
 .manifesto__index {
@@ -157,8 +192,7 @@
   align-items: stretch;
   flex-direction: column;
   justify-content: center;
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline: 0;
 }
 
 .cover-wall {
@@ -167,7 +201,7 @@
   gap: clamp(16px, 2vw, 36px);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding: clamp(48px, 6vw, 96px) clamp(48px, 6vw, 120px);
+  padding: clamp(36px, 5vw, 72px) clamp(24px, 5vw, 96px);
   scrollbar-width: thin;
   scrollbar-color: var(--mid) transparent;
 }
@@ -180,7 +214,7 @@
 
 .cover-wall__item {
   flex: 0 0 auto;
-  width: clamp(180px, 22vw, 340px);
+  width: clamp(160px, 20vw, 280px);
   scroll-snap-align: start;
   margin: 0;
   display: flex;
@@ -213,7 +247,7 @@
 
 .cover-wall__fallback {
   font-family: var(--font-display);
-  font-size: clamp(3rem, 6vw, 5rem);
+  font-size: clamp(2.5rem, 5vw, 4rem);
   line-height: 1;
   color: var(--mid);
   letter-spacing: -0.04em;
@@ -228,11 +262,11 @@
 
 .cover-wall__title {
   font-family: var(--font-display);
-  font-size: var(--text-compact);
+  font-size: var(--text-micro);
   text-transform: uppercase;
   letter-spacing: -0.01em;
   text-align: right;
-  max-width: 75%;
+  max-width: 70%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -241,17 +275,14 @@
 
 /* ── Chapter 4 · Featured volume ──────────────────────────────────── */
 
-.chapter--featured {
-  padding: clamp(48px, 6vw, 120px);
-}
-
 .featured {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(0, 1.6fr);
+  grid-template-columns: minmax(220px, 1fr) minmax(0, 1.6fr);
   gap: clamp(36px, 5vw, 96px);
   align-items: center;
   width: 100%;
   max-width: 1480px;
+  margin: 0 auto;
 }
 
 .featured__plate {
@@ -260,6 +291,11 @@
   display: grid;
   place-items: center;
   overflow: hidden;
+  /* Cap the featured cover so it doesn't dominate ultra-wide screens. */
+  max-width: 480px;
+  width: 100%;
+  margin-inline: auto;
+  justify-self: center;
 }
 
 .featured__plate img {
@@ -280,7 +316,7 @@
 
 .featured__fallback {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 8vw, 7rem);
+  font-size: clamp(3rem, 6vw, 5rem);
   line-height: 1;
   color: var(--mid);
   letter-spacing: -0.04em;
@@ -289,23 +325,27 @@
 .featured__copy {
   display: flex;
   flex-direction: column;
-  gap: clamp(16px, 2vw, 36px);
+  gap: clamp(16px, 2vw, 32px);
+  min-width: 0; /* allow grid item to shrink so long titles wrap */
 }
 
 .featured__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(2.25rem, 7vw, 6rem);
+  /* Capped lower than the hero — featured titles can be long. */
+  font-size: clamp(2rem, 5.5vw, 5rem);
   line-height: 0.95;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.025em;
   text-transform: uppercase;
   margin: 0;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .featured__notes {
   margin: 0;
   font-family: var(--font-body);
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-size: clamp(0.95rem, 1.2vw, 1.125rem);
   line-height: 1.5;
   color: var(--mid);
   max-width: 56ch;
@@ -318,9 +358,12 @@
   flex-wrap: wrap;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 760px) {
   .featured {
     grid-template-columns: 1fr;
+  }
+  .featured__plate {
+    max-width: 320px;
   }
 }
 
@@ -336,16 +379,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(24px, 3vw, 56px);
-  max-width: 56ch;
+  gap: clamp(20px, 3vw, 48px);
+  max-width: min(56ch, 100%);
 }
 
 .closing__title {
   font-family: var(--font-display);
   font-weight: 400;
-  font-size: clamp(3rem, 10vw, 9rem);
+  font-size: clamp(2.25rem, 7vw, 6rem);
   line-height: 0.95;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   text-transform: uppercase;
   margin: 0;
 }
@@ -353,7 +396,7 @@
 .closing__copy {
   margin: 0;
   font-family: var(--font-body);
-  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-size: clamp(0.95rem, 1.2vw, 1.125rem);
   line-height: 1.5;
   color: var(--mid);
 }
@@ -361,7 +404,7 @@
 /* ── Larger primary pill ──────────────────────────────────────────── */
 
 .button--large {
-  padding: var(--space-3) clamp(24px, 3vw, 36px);
+  padding: var(--space-3) clamp(20px, 3vw, 36px);
   font-size: var(--text-compact);
   letter-spacing: var(--track-caps);
 }
@@ -370,16 +413,17 @@
 
 @media (max-width: 540px) {
   .chapter {
-    padding: 36px 24px;
-    min-height: 90vh;
+    padding-block: clamp(72px, 14vh, 120px);
+    padding-inline: 20px;
+    min-height: 100svh;
   }
+  /* Corners shrink to single-line captions and stay positioned;
+   * we already clamped them small so they don't crowd content. */
   .chapter__corner {
-    position: static;
-    transform: none;
-    flex-direction: row;
-    justify-content: space-between;
+    max-width: 50%;
   }
-  .chapter--hero {
-    padding-top: 72px;
+  /* Hero overline stays small but legible. */
+  .hero__sub {
+    font-size: 0.95rem;
   }
 }

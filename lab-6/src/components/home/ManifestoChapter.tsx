@@ -1,5 +1,6 @@
-// Manifesto chapter — three short statements set at architectural scale.
-// Each line is a chapter of its own; the type IS the layout.
+// Manifesto chapter — short statements at architectural scale. The
+// copy is deliberately terse: at 96px+ display type, anything longer
+// than ~3 words wraps to multiple lines and breaks the rhythm.
 
 export function ManifestoChapter() {
   return (
@@ -20,13 +21,13 @@ export function ManifestoChapter() {
         </p>
         <p className="manifesto__line">
           <span className="manifesto__index">03</span>
-          <span>No accounts. No tracking. No clouds — unless you choose one.</span>
+          <span>Local first.</span>
         </p>
       </div>
 
-      <div className="chapter__corner chapter__corner--bl">
+      <div className="chapter__corner chapter__corner--br">
         <span className="caption-mono caption-mono--mid">
-          Stored locally in your browser
+          No accounts · no tracking · no clouds you didn't ask for
         </span>
       </div>
     </section>

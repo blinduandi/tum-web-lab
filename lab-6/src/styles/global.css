@@ -16,6 +16,14 @@ body,
   min-height: 100%;
 }
 
+html,
+body {
+  /* Belt-and-suspenders: every chapter has overflow:hidden, but if any
+   * monumental headline ever escapes its container the document stays
+   * scroll-locked horizontally. */
+  overflow-x: hidden;
+}
+
 body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -92,17 +100,24 @@ body {
 
 @media (max-width: 720px) {
   .top-nav {
-    grid-template-columns: auto 1fr auto;
+    grid-template-columns: 1fr auto 1fr;
     gap: var(--space-2);
-  }
-  .top-nav__brand {
-    text-align: right;
+    padding-inline: 16px;
   }
   .nav-link {
     padding: var(--space-1) var(--space-2);
+    font-size: var(--text-micro);
   }
-  .top-nav__right .nav-link {
-    display: none; /* "+ Add" only on desktop nav; library has its own */
+  /* Drop the brand line at the smallest sizes; the route links carry the
+   * identity well enough on phones. */
+}
+
+@media (max-width: 480px) {
+  .top-nav__brand {
+    display: none;
+  }
+  .top-nav {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
