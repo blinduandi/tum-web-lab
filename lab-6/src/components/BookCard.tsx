@@ -1,7 +1,8 @@
-import { READING_STATUS_LABEL, type Book } from "../data/types";
+import { READING_STATUS_LABEL, READING_STATUS_ORDER, type Book } from "../data/types";
 
 interface BookCardProps {
   book: Book;
+  index: number;
   onToggleLike: (id: string) => void;
   onDelete: (id: string) => void;
   onCycleStatus: (id: string) => void;
@@ -10,11 +11,24 @@ interface BookCardProps {
 
 export function BookCard({
   book,
+  index,
   onToggleLike,
   onDelete,
   onCycleStatus,
   onEdit,
 }: BookCardProps) {
+  const meta = [
+    book.year ? String(book.year) : null,
+    book.pages ? `${book.pages}p` : null,
+    book.genre || null,
+  ].filter(Boolean) as string[];
+
+  // Status pill cycles through the order — title doubles as a tooltip cue.
+  const nextStatus = (() => {
+    const i = READING_STATUS_ORDER.indexOf(book.status);
+    return READING_STATUS_ORDER[(i + 1) % READING_STATUS_ORDER.length];
+  })();
+
   return (
     <article className="book-card" data-status={book.status}>
       <div className="book-card__cover">
@@ -44,25 +58,33 @@ export function BookCard({
       </div>
 
       <div className="book-card__body">
+        <span className="book-card__index">№ {String(index + 1).padStart(2, "0")}</span>
         <h3 className="book-card__title" title={book.title}>
           {book.title}
         </h3>
         <p className="book-card__author">{book.author || "Unknown author"}</p>
 
-        <div className="book-card__meta">
-          {book.genre ? <span className="chip">{book.genre}</span> : null}
-          {book.year ? <span className="chip chip--ghost">{book.year}</span> : null}
-          {book.pages ? <span className="chip chip--ghost">{book.pages}p</span> : null}
-        </div>
+        {meta.length ? (
+          <div className="book-card__meta">
+            {meta.flatMap((part, i) =>
+              i === 0
+                ? [<span key={i}>{part}</span>]
+                : [
+                    <span key={`s-${i}`} className="book-card__meta-sep">·</span>,
+                    <span key={i}>{part}</span>,
+                  ],
+            )}
+          </div>
+        ) : null}
 
         <div className="book-card__actions">
           <button
             type="button"
             className="status-pill"
             onClick={() => onCycleStatus(book.id)}
-            title="Click to change status"
+            title={`Mark as ${READING_STATUS_LABEL[nextStatus]}`}
           >
-            {READING_STATUS_LABEL[book.status]}
+            {READING_STATUS_LABEL[book.status]} ↻
           </button>
           <button
             type="button"
@@ -76,7 +98,7 @@ export function BookCard({
             className="link-button link-button--danger"
             onClick={() => onDelete(book.id)}
           >
-            Delete
+            Remove
           </button>
         </div>
       </div>

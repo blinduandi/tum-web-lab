@@ -23,9 +23,10 @@ export function BookGrid({
   }
   return (
     <div className="book-grid">
-      {books.map((book) => (
+      {books.map((book, i) => (
         <BookCard
           key={book.id}
+          index={i}
           book={book}
           onToggleLike={onToggleLike}
           onDelete={onDelete}
