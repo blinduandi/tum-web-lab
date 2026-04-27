@@ -1,8 +1,17 @@
+/*
+ * Modal + form. The modal is the only "elevated" surface in the system,
+ * but per DESIGN.md §4 it stays on the same canvas with a hairline frame —
+ * no shadow, no rounded card, no glassmorphism.
+ *
+ * Inputs follow the §4 fallback (transparent canvas, mid border, white on
+ * focus). Buttons use the two-tier system: pill primary (white outline,
+ * fills on hover) + utility secondary (6px gray, hairline).
+ */
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgb(0 0 0 / 0.45);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.7);
   display: grid;
   place-items: center;
   padding: var(--space-4);
@@ -11,55 +20,65 @@
 }
 
 .modal {
-  background: var(--surface);
+  background: var(--bg);
   color: var(--text);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border);
+  border: var(--hairline) solid var(--text);
+  border-radius: var(--radius-utility);
   width: 100%;
   max-width: 560px;
   max-height: calc(100vh - 4rem);
   overflow: auto;
-  box-shadow: var(--shadow-lg);
-  animation: pop-in var(--transition-med);
+  animation: fade-in var(--transition-med);
 }
 
 .modal__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--hairline) solid var(--mid);
 }
 
 .modal__title {
   margin: 0;
-  font-size: 1.1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-compact);
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--text);
 }
 
 .modal__close {
-  background: none;
-  border: none;
-  font-size: 1.5rem;
+  background: transparent;
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  color: var(--text);
+  font-size: 1rem;
   line-height: 1;
-  color: var(--text-muted);
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  padding: 0 var(--space-2);
+  transition: border-color var(--transition-fast);
 }
 
 .modal__close:hover {
-  color: var(--text);
-  background: var(--surface-2);
+  border-color: var(--text);
 }
 
 .modal__body {
-  padding: var(--space-5);
+  padding: var(--space-4);
 }
+
+/* ── Form layout ──────────────────────────────────────────────────── */
 
 .book-form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .field {
@@ -69,30 +88,57 @@
 }
 
 .field > span {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  color: var(--mid);
 }
 
 .field input,
 .field select,
 .field textarea {
   padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  background: transparent;
   color: var(--text);
-  font: inherit;
-  transition:
-    border-color var(--transition-fast),
-    box-shadow var(--transition-fast);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  transition: border-color var(--transition-fast);
+  /* Bugatti has no glow; the border-color shift IS the focus signal. */
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--mid);
 }
 
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
   outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
+  border-color: var(--text);
+}
+
+.field select {
+  font-family: var(--font-mono);
+  font-size: var(--text-compact);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+    linear-gradient(135deg, currentColor 50%, transparent 50%);
+  background-position: calc(100% - 14px) 50%, calc(100% - 9px) 50%;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+  padding-right: var(--space-4);
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  font-family: var(--font-body);
 }
 
 .field-row {
@@ -103,76 +149,115 @@
 
 .form-error {
   margin: 0;
-  color: var(--danger);
-  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  color: var(--text);
+  padding: var(--space-2);
+  border: var(--hairline) solid var(--text);
+  border-radius: var(--radius-utility);
 }
 
 .form-hint {
   margin: 0;
-  font-size: 0.85rem;
-  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: var(--text-compact);
   line-height: 1.5;
+  color: var(--mid);
 }
 
 .role-legend {
   margin: 0;
   padding: var(--space-3);
   list-style: none;
-  background: var(--surface-2);
-  border-radius: var(--radius-sm);
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
+  text-transform: uppercase;
+  color: var(--mid);
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: var(--space-2);
 }
 
 .role-legend b {
   color: var(--text);
-  font-weight: 600;
+  font-weight: 400;
+  margin-right: var(--space-1);
 }
+
+/* ── Buttons (DESIGN.md §4) ───────────────────────────────────────── */
 
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: var(--space-2);
+  margin-top: var(--space-2);
 }
 
 .button {
-  padding: var(--space-2) var(--space-4);
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
+  font-family: var(--font-mono);
+  font-size: var(--text-compact);
+  font-weight: 400;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
   cursor: pointer;
-  font: inherit;
-  font-weight: 500;
   transition:
     background var(--transition-fast),
+    color var(--transition-fast),
     border-color var(--transition-fast),
-    transform var(--transition-fast);
+    opacity var(--transition-fast);
 }
 
 .button:active {
-  transform: translateY(1px);
+  opacity: 0.7;
 }
 
+/* Primary — white outlined pill (§4.Primary) */
 .button--primary {
-  background: var(--accent);
-  color: var(--accent-text);
+  background: transparent;
+  color: var(--text);
+  border: var(--hairline) solid var(--text);
+  border-radius: var(--radius-pill);
+  padding: var(--space-3) var(--space-4);
 }
 
 .button--primary:hover {
-  filter: brightness(1.05);
+  background: var(--text);
+  color: var(--bg);
 }
 
+.button--primary:disabled {
+  border-color: var(--mid);
+  color: var(--mid);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+/* Secondary — 6px utility (§4.Secondary) */
 .button--ghost {
   background: transparent;
-  border-color: var(--border);
   color: var(--text);
+  border: var(--hairline) solid var(--mid);
+  border-radius: var(--radius-utility);
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-micro);
+  letter-spacing: var(--track-caps-tight);
 }
 
 .button--ghost:hover {
-  background: var(--surface-2);
+  border-color: var(--text);
 }
+
+.button--ghost:disabled {
+  color: var(--mid);
+  cursor: not-allowed;
+}
+
+/* ── Animations ──────────────────────────────────────────────────── */
 
 @keyframes fade-in {
   from {
@@ -180,17 +265,6 @@
   }
   to {
     opacity: 1;
-  }
-}
-
-@keyframes pop-in {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
   }
 }
 
